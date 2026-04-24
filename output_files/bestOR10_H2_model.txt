@@ -1,0 +1,20 @@
+V1
+fc H
+rm 2
+tune.args fc.H_rm.2
+auc.train 0.9879336
+cbi.train 0.464
+auc.diff.avg 0.009848957
+auc.diff.sd 0.006007475
+auc.val.avg 0.9534024
+auc.val.sd 0.03020796
+cbi.val.avg NA
+cbi.val.sd NA
+or.10p.avg 0.05929487
+or.10p.sd 0.03964525
+or.mtp.avg 0.01923077
+or.mtp.sd 0.03846154
+AICc 1535.013
+delta.AICc 68.02338
+w.AIC 1.516947e-15
+ncoef 9

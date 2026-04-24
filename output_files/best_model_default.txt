@@ -1,0 +1,20 @@
+V1
+fc LQH
+rm 1
+tune.args fc.LQH_rm.1
+auc.train 1
+cbi.train 1
+auc.diff.avg 0.008603239
+auc.diff.sd 0.01720648
+auc.val.avg 0.9615385
+auc.val.sd 0.04441156
+cbi.val.avg 1
+cbi.val.sd 0
+or.10p.avg 0.1153846
+or.10p.sd 0.1831135
+or.mtp.avg 0.03846154
+or.mtp.sd 0.04441156
+AICc 1466.989
+delta.AICc 0
+w.AIC 0.8954898
+ncoef 10
