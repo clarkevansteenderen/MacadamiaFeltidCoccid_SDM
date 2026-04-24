@@ -1,0 +1,17 @@
+"scenario","province","n_farms","n_suitable","prop_suitable"
+"Current","Eastern Cape",1,1,1
+"Current","KwaZulu-Natal",273,168,0.615384615384615
+"Current","Limpopo",8,7,0.875
+"Current","Mpumalanga",245,212,0.86530612244898
+"2050","Eastern Cape",1,1,1
+"2050","KwaZulu-Natal",273,219,0.802197802197802
+"2050","Limpopo",8,3,0.375
+"2050","Mpumalanga",245,152,0.620408163265306
+"2070","Eastern Cape",1,1,1
+"2070","KwaZulu-Natal",273,175,0.641025641025641
+"2070","Limpopo",8,2,0.25
+"2070","Mpumalanga",245,82,0.33469387755102
+"2100","Eastern Cape",1,0,0
+"2100","KwaZulu-Natal",273,137,0.501831501831502
+"2100","Limpopo",8,2,0.25
+"2100","Mpumalanga",245,46,0.187755102040816
