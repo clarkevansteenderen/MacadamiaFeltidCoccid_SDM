@@ -101,7 +101,7 @@ usdm::vifstep(clim_sp, th = 5)
 reduced_preds_all19r2 = terra::subset(x = pred_clim_current, 
                                       subset = all_19_reduced_r2)
 
-terra::writeRaster(reduced_preds_all19r2, "data/predictors_current.tif")
+terra::writeRaster(reduced_preds_all19r2, "data/predictors_current.tif", overwrite = TRUE)
 
 clim_sp_reduced = terra::extract(
   x = reduced_preds_all19r2,         
@@ -117,12 +117,12 @@ clim_sp_reduced = dplyr::select(clim_sp_reduced, !ID)
 
 # 2050
 terra::subset(x = pred_clim_2050, subset = all_19_reduced_r2) %>%
-              terra::writeRaster("data/predictors_2050.tif")
+              terra::writeRaster("data/predictors_2050.tif", overwrite = TRUE)
 
 # 2070
 terra::subset(x = pred_clim_2070, subset = all_19_reduced_r2) %>%
-  terra::writeRaster("data/predictors_2070.tif")
+  terra::writeRaster("data/predictors_2070.tif", overwrite = TRUE)
 
 # 2100
 terra::subset(x = pred_clim_2100, subset = all_19_reduced_r2) %>%
-  terra::writeRaster("data/predictors_2100.tif")
+  terra::writeRaster("data/predictors_2100.tif", overwrite = TRUE)

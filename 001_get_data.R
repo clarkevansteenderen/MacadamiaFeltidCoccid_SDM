@@ -168,13 +168,22 @@ sp_gps = readr::read_csv("gps/MFC_positive_records.csv") %>%
 
 head(sp_gps)
 
-# Let's just keep the columns of interest
-sp_data = sp_gps %>%
+# read in the points from GBIF
+sp_gbif = readxl::read_xlsx("gps/GBIF_MFC_records.xlsx") %>%
   dplyr::select(
     species,
-    lon,
-    lat
+    lat = decimalLatitude,
+    lon = decimalLongitude
   )
+
+sp_gbif$lat = as.numeric(sp_gbif$lat)
+sp_gbif$lon = as.numeric(sp_gbif$lon)
+
+str(sp_gbif)
+
+sp_data = dplyr::bind_rows(sp_gps, sp_gbif)
+
+sp_data
 
 #################################
 # Remove duplicate GPS data and 

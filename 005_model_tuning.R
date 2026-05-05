@@ -84,17 +84,17 @@ best_auc_test_output = best_auc %>% t(.)
 write.table(best_auc_test_output, "data/bestAUC_H1_model.txt", quote = FALSE)
 
 # CBI values don't work for some reason!
-# select the model that optimised CBI (highest CBI value)
-# best_cbi = res %>% 
-#   dplyr::filter(cbi.val.avg == max(cbi.val.avg)) ;best_cbi
-# best_cbi_output = best_cbi %>% t(.)
-# write.table(best_cbi_output, "data/bestCBI_Q2_model.txt", quote = FALSE)
+#select the model that optimised CBI (highest CBI value)
+best_cbi = res %>%
+  dplyr::filter(cbi.val.avg == max(cbi.val.avg)) ;best_cbi
+best_cbi_output = best_cbi %>% t(.)
+write.table(best_cbi_output, "data/bestCBI_H1_model.txt", quote = FALSE)
 
 # select the model that optimised the 10% omission rate (lowest or.10p value)
 best_or.10p.avg = res %>% 
   dplyr::filter(or.10p.avg == min(or.10p.avg)) ;best_or.10p.avg
 best_or.10p.avg_output = best_or.10p.avg %>% t(.)
-write.table(best_or.10p.avg_output, "data/bestOR10_H2_model.txt", quote = FALSE)
+write.table(best_or.10p.avg_output, "data/bestOR10_H4_model.txt", quote = FALSE)
 
 # default model output
 default_mod_results = res %>% 
@@ -105,14 +105,25 @@ write.table(default_mod_results, "data/best_model_default.txt", quote = FALSE)
 best_models = dplyr::bind_rows(
   best_delta_aicc %>% dplyr::mutate(opt_criterion = "AICc (delta = 0)"),
   best_auc       %>% dplyr::mutate(opt_criterion = "AUC (max val AUC)"),
+  best_cbi %>% dplyr::mutate(opt_criterion = "CBI (max val CBI)"),
   best_or.10p.avg %>% dplyr::mutate(opt_criterion = "10% omission (min)")
 )
+
+best_models
+
+best_models_collapsed <- best_models %>%
+  dplyr::group_by(across(-opt_criterion)) %>%
+  dplyr::summarise(
+    opt_criterion = paste(opt_criterion, collapse = "; "),
+    .groups = "drop"
+  )
 
 best_summary = best_models %>%
   dplyr::select(
     opt_criterion,
     fc, rm, 
     auc.val.avg, auc.val.sd,
+    cbi.val.avg, cbi.val.sd,
     or.10p.avg, or.10p.sd,
     AICc, delta.AICc
   )
@@ -129,13 +140,18 @@ best_summary = best_summary %>%
       " ± ",
       format(round(auc.val.sd, 3), nsmall = 3)
     ),
+    CBI = paste0(
+      format(round(cbi.val.avg, 3), nsmall = 3),
+      " ± ",
+      format(round(cbi.val.sd, 3), nsmall = 3)
+    ),
     `10% omission rate` = paste0(
       format(round(or.10p.avg, 3), nsmall = 3),
       " ± ",
       format(round(or.10p.sd, 3), nsmall = 3)
     )
   ) %>%
-  dplyr::select(opt_criterion, fc, rm, AUC, `10% omission rate`, AICc, delta.AICc)
+  dplyr::select(opt_criterion, fc, rm, AUC, CBI, `10% omission rate`, AICc, delta.AICc)
 
 best_summary 
 

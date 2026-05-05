@@ -9,8 +9,13 @@ records_spatial = sp::SpatialPointsDataFrame(
 )
 
 # Select KG ecoregions in which there is at least one GPS record
-kg_sp = as(kg_layer, "Spatial")
-kg_contain = kg_sp[records_spatial, ]
+#kg_sp = as(kg_layer, "Spatial")
+#kg_contain = kg_sp[records_spatial, ]
+
+kg_sf <- st_as_sf(kg_layer)
+pts_sf <- st_as_sf(records_spatial)
+kg_sf <- st_make_valid(kg_sf)
+kg_contain <- kg_sf[lengths(st_intersects(kg_sf, pts_sf)) > 0, ]
 
 
 # Plot regions containing at least one record
@@ -57,7 +62,7 @@ set.seed(2023)
   
 bg_points = terra::spatSample(
     x = bg_area,        # Raster of background area to sample points from 
-    size = 1000,        # How many background points do we want?
+    size = 10000,        # How many background points do we want?
     method = "random",  # Random points
     replace = FALSE,    # Sample without replacement
     na.rm = TRUE,       # Remove background points that have NA climate data

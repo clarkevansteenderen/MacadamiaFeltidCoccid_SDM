@@ -3,6 +3,8 @@ predictors = terra::rast("data/predictors_current.tif")
 PRES.POINTS = readRDS("data/PRESPOINTS.rds")
 BACK.POINTS = readRDS("data/BACKPOINTS.rds")
 
+head(PRES.POINTS)
+
 coords.pres = PRES.POINTS %>%
   dplyr::select(decimalLongitude, decimalLatitude)
 
@@ -48,7 +50,7 @@ myBiomodData
 
 myBiomodOptions = bm_ModelingOptions(
   data.type = 'binary',
-  models = c("ANN", "CTA", "FDA", "GAM", "GBM", "GLM", "MARS", "MAXENT", "MAXNET", "RF"),
+  models = c("ANN", "CTA", "FDA", "GAM", "GBM", "GLM", "MARS", "MAXNET", "RF"),
   strategy = 'default',
   bm.format = myBiomodData
 )
@@ -63,7 +65,7 @@ print(myBiomodOptions@options$MAXNET.binary.maxnet.maxnet@args.values[['_allData
 myBiomodModelOut = BIOMOD_Modeling(
   bm.format = myBiomodData,
   modeling.id = "Acanthococcus ironsidei",
-  models = c("ANN", "CTA", "FDA", "GAM", "GBM", "GLM", "MARS", "MAXENT", "MAXNET", "RF"),
+  models = c("ANN", "CTA", "FDA", "GAM", "GBM", "GLM", "MARS", "MAXNET", "RF"),
   bm.options = myBiomodOptions,
   CV.strategy = 'random',
   CV.nb.rep = 10,
@@ -145,7 +147,7 @@ df = preds %>%
 # =========================================================
 algs_keep = c(
   "ANN", "CTA", "FDA", "GAM", "GBM",
-  "GLM", "MARS", "MAXENT", "MAXNET", "RF"
+  "GLM", "MARS", "MAXNET", "RF"
 )
 
 df = df %>%
@@ -259,12 +261,12 @@ auc_table = df %>%
 
 roc.plot = ggplot(roc_summary, aes(x = fpr, y = tpr_mean, colour = algo, fill = algo)) +
   
-geom_ribbon(
-  aes(ymin = tpr_mean - tpr_sd,
-      ymax = tpr_mean + tpr_sd),
-  alpha = 0.15,
-  colour = NA
-) +
+# geom_ribbon(
+#   aes(ymin = tpr_mean - tpr_sd,
+#       ymax = tpr_mean + tpr_sd),
+#   alpha = 0.15,
+#   colour = NA
+# ) +
   
 geom_line(linewidth = 1) +
 
@@ -276,8 +278,8 @@ geom_abline(slope = 1, intercept = 0,
     breaks = seq(0, 1, 0.2)
   ) +
   scale_y_continuous(
-    limits = c(0, 1),
-    breaks = seq(0, 1, 0.2)
+    limits = c(0, 1.1),
+    breaks = seq(0, 1.1, 0.2)
   ) +
 coord_equal() +
   labs(
@@ -443,11 +445,9 @@ myBiomodEM
 
 myKeptModels = get_kept_models(myBiomodEM)
 
-# Print the list --> we have 71 models
+# Print the list --> we have 82 models
 print(myKeptModels)
 length(myKeptModels)
-
-
 
 ####################################################################################
 # PROJECT THIS ENSEMBLE MODEL ONTO AFRICA
@@ -552,7 +552,6 @@ pts = terra::vect(coords.pres, geom=c("decimalLongitude", "decimalLatitude"), cr
 vals_at_presences = terra::extract(current_prob_masked, pts)
 
 # calculate the NEW threshold from these exact values
-by(resp_data$pred.val, resp_data$algo, function(x) quantile(x, 0.1, na.rm = TRUE))
 THRESH_current = quantile(vals_at_presences[,2], probs = 0.1, na.rm = TRUE)
 THRESH_current
 
@@ -833,7 +832,28 @@ macfarms_long = macfarms_sf %>%
 macfarms_long$exceeds_thresh = ifelse(macfarms_long$suitability > THRESH_current, 1, 0)
 head(macfarms_long)
 
+# current
+macfarms_suitability_current = macfarms_long %>%
+  dplyr::filter(scenario == "Current")
 
+macfarms_suitability_current
+str(macfarms_suitability_current)
+
+# 2050
+macfarms_suitability_2050 = macfarms_long %>%
+  dplyr::filter(scenario == "2050")
+
+macfarms_suitability_2050
+str(macfarms_suitability_2050)
+
+# 2070
+macfarms_suitability_2070 = macfarms_long %>%
+  dplyr::filter(scenario == "2070")
+
+macfarms_suitability_2070
+str(macfarms_suitability_2070)
+
+# 2100
 macfarms_suitability_2100 = macfarms_long %>%
   dplyr::filter(scenario == "2100")
 
@@ -848,7 +868,113 @@ farmpoints_sf = st_join(farmpoints_sf, provincial_borders ["name"])
 macfarms_long$province = farmpoints_sf$name
 head(macfarms_long)
 
-future.plot.withfarmcoords = future.2100.plot + 
+############################
+# Current
+############################
+
+plot.withfarmcoords.current = current.plot + 
+  ggnewscale::new_scale_fill() +
+  geom_point(
+    data = macfarms_suitability_current,
+    aes(x = lon, y = lat, fill = factor(exceeds_thresh)),
+    shape = 21,
+    size = 3,
+    stroke = 1,
+    colour = "black"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "white",  # unsuitable
+               "1" = "darkgreen"), # suitable
+    labels = c("0" = "Below threshold",
+               "1" = "Above threshold"),
+    name = "Suitability"
+  ) +
+  coord_sf(
+    xlim = c(27, 33),
+    ylim = c(-31.6, -22.6),
+    expand = FALSE
+  )
+
+plot.withfarmcoords.current
+
+ggsave("figures/suitable_farms_by_current.png", plot = plot.withfarmcoords.current, 
+       width = 8, height = 8, dpi = 450)
+ggsave("figures/suitable_farms_by_current.svg", plot = plot.withfarmcoords.current, 
+       width = 8, height = 8, dpi = 450)
+
+############################
+# 2050
+############################
+
+future.plot.withfarmcoords.2050 = future.2050.plot + 
+  ggnewscale::new_scale_fill() +
+  geom_point(
+    data = macfarms_suitability_2050,
+    aes(x = lon, y = lat, fill = factor(exceeds_thresh)),
+    shape = 21,
+    size = 3,
+    stroke = 1,
+    colour = "black"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "white",  # unsuitable
+               "1" = "darkgreen"), # suitable
+    labels = c("0" = "Below threshold",
+               "1" = "Above threshold"),
+    name = "Suitability"
+  ) +
+  coord_sf(
+    xlim = c(27, 33),
+    ylim = c(-31.6, -22.6),
+    expand = FALSE
+  )
+
+future.plot.withfarmcoords.2050
+
+ggsave("figures/suitable_farms_by_2050.png", plot = future.plot.withfarmcoords.2050, 
+       width = 8, height = 8, dpi = 450)
+ggsave("figures/suitable_farms_by_2050.svg", plot = future.plot.withfarmcoords.2050, 
+       width = 8, height = 8, dpi = 450)
+
+############################
+# 2070
+############################
+
+future.plot.withfarmcoords.2070 = future.2070.plot + 
+  ggnewscale::new_scale_fill() +
+  geom_point(
+    data = macfarms_suitability_2070,
+    aes(x = lon, y = lat, fill = factor(exceeds_thresh)),
+    shape = 21,
+    size = 3,
+    stroke = 1,
+    colour = "black"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "white",  # unsuitable
+               "1" = "darkgreen"), # suitable
+    labels = c("0" = "Below threshold",
+               "1" = "Above threshold"),
+    name = "Suitability"
+  ) +
+  coord_sf(
+    xlim = c(27, 33),
+    ylim = c(-31.6, -22.6),
+    expand = FALSE
+  )
+
+future.plot.withfarmcoords.2070
+
+ggsave("figures/suitable_farms_by_2070.png", plot = future.plot.withfarmcoords.2070, 
+       width = 8, height = 8, dpi = 450)
+ggsave("figures/suitable_farms_by_2070.svg", plot = future.plot.withfarmcoords.2070, 
+       width = 8, height = 8, dpi = 450)
+
+############################
+# 2100
+############################
+
+future.plot.withfarmcoords.2100 = future.2100.plot + 
   ggnewscale::new_scale_fill() +
   geom_point(
     data = macfarms_suitability_2100,
@@ -871,37 +997,51 @@ future.plot.withfarmcoords = future.2100.plot +
     expand = FALSE
   )
 
-future.plot.withfarmcoords
+future.plot.withfarmcoords.2100
 
-ggsave("figures/suitable_farms_by_2100.png", plot = future.plot.withfarmcoords, 
+ggsave("figures/suitable_farms_by_2100.png", plot = future.plot.withfarmcoords.2100, 
        width = 8, height = 8, dpi = 450)
-ggsave("figures/suitable_farms_by_2100.svg", plot = future.plot.withfarmcoords, 
+ggsave("figures/suitable_farms_by_2100.svg", plot = future.plot.withfarmcoords.2100, 
        width = 8, height = 8, dpi = 450)
 
-future.plot.withfarmcoords.binary = map.2100 + 
-  ggnewscale::new_scale_fill() +
-  geom_point(
-    data = macfarms_suitability_2100,
-    aes(x = lon, y = lat, fill = factor(exceeds_thresh)),
-    shape = 21,
-    size = 3,
-    stroke = 1,
-    colour = "black"
-  ) +
-  scale_fill_manual(
-    values = c("0" = "white",  # unsuitable
-               "1" = "darkgreen"), # suitable
-    labels = c("0" = "Below threshold",
-               "1" = "Above threshold"),
-    name = "Suitability"
-  ) +
-  coord_sf(
-    xlim = c(26, 33),
-    ylim = c(-32, -22),
-    expand = FALSE
-  )
 
-future.plot.withfarmcoords.binary
+farm.plots = 
+  (plot.withfarmcoords.current + 
+     future.plot.withfarmcoords.2050 + 
+     future.plot.withfarmcoords.2070 + 
+     future.plot.withfarmcoords.2100) +
+  plot_layout(nrow = 2) +
+  plot_annotation(tag_levels = "A")
+
+farm.plots
+
+ggsave("figures/farm.plots.png", plot = farm.plots, 
+       width = 8, height = 10, dpi = 450)
+
+# future.plot.withfarmcoords.binary = map.2100 + 
+#   ggnewscale::new_scale_fill() +
+#   geom_point(
+#     data = macfarms_suitability_2100,
+#     aes(x = lon, y = lat, fill = factor(exceeds_thresh)),
+#     shape = 21,
+#     size = 3,
+#     stroke = 1,
+#     colour = "black"
+#   ) +
+#   scale_fill_manual(
+#     values = c("0" = "white",  # unsuitable
+#                "1" = "darkgreen"), # suitable
+#     labels = c("0" = "Below threshold",
+#                "1" = "Above threshold"),
+#     name = "Suitability"
+#   ) +
+#   coord_sf(
+#     xlim = c(26, 33),
+#     ylim = c(-32, -22),
+#     expand = FALSE
+#   )
+# 
+# future.plot.withfarmcoords.binary
 
 summary_thresh = macfarms_long %>%
   group_by(scenario, province) %>%
