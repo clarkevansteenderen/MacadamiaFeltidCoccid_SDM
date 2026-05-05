@@ -1,4 +1,5 @@
-opt_criterion,fc,rm,AUC,10% omission rate,AICc,delta.AICc
-AICc (delta = 0),LQH,1,0.96 ± 0.044,0.12 ± 0.18,1466.99,0
-AUC (max val AUC),H,1,0.98 ± 0.037,0.12 ± 0.13,1471.29,4.3
-10% omission (min),H,2,0.95 ± 0.030,0.06 ± 0.04,1535.01,68.02
+opt_criterion,fc,rm,AUC,CBI,10% omission rate,AICc,delta.AICc
+AICc (delta = 0),LQH,1,0.953 ± 0.020,0.700 ± 0.223,0.150 ± 0.065,1493.6,0
+AUC (max val AUC),H,1,0.958 ± 0.019,0.706 ± 0.140,0.111 ± 0.043,1498.903,5.303
+10% omission (min),H,4,0.939 ± 0.027,0.446 ± 0.591,0.092 ± 0.071,1587.863,94.263
+10% omission (min),H,5,0.928 ± 0.032,0.424 ± 0.594,0.092 ± 0.071,1617.506,123.906
