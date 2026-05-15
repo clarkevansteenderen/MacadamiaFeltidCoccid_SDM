@@ -54,6 +54,8 @@ summary_df <- full_long %>%
     .groups = "drop"
   )
 
+write.csv(summary_df, file ="figures/predictor_changes.csv", row.names = F)
+
 pred_changes = ggplot(full_long, aes(x = year, y = value, group = id)) +
   geom_line(alpha = 0.2) +
   # SD ribbon (uncertainty envelope)
